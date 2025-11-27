@@ -1,0 +1,42 @@
+[
+    {
+        "k": 0,
+        "retriever": "zero-shot",
+        "total_samples": 100,
+        "exact_match_rate": 13.0,
+        "syntax_valid_rate": 99.0,
+        "execution_match_rate": 35.0,
+        "avg_latency_sec": 19.457384610176085,
+        "avg_total_tokens": 1692.53
+    },
+    {
+        "k": 1,
+        "retriever": "semantic_bge-small-en-v1.5",
+        "total_samples": 100,
+        "exact_match_rate": 5.0,
+        "syntax_valid_rate": 96.0,
+        "execution_match_rate": 41.0,
+        "avg_latency_sec": 19.74066092252731,
+        "avg_total_tokens": 1756.31
+    },
+    {
+        "k": 3,
+        "retriever": "semantic_bge-small-en-v1.5",
+        "total_samples": 100,
+        "exact_match_rate": 0.0,
+        "syntax_valid_rate": 93.0,
+        "execution_match_rate": 41.0,
+        "avg_latency_sec": 19.601755831241608,
+        "avg_total_tokens": 1869.43
+    },
+    {
+        "k": 5,
+        "retriever": "semantic_bge-small-en-v1.5",
+        "total_samples": 100,
+        "exact_match_rate": 0.0,
+        "syntax_valid_rate": 98.0,
+        "execution_match_rate": 34.0,
+        "avg_latency_sec": 20.86475204229355,
+        "avg_total_tokens": 2005.4
+    }
+]
