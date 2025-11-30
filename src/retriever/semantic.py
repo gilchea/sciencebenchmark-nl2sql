@@ -19,7 +19,6 @@ class SemanticRetriever:
         self.model = SentenceTransformer(model_name, device=device)
         self.index = None
         self.example_pool = []
-        # Sửa: Đảm bảo device được lưu
         self.device = device if torch.cuda.is_available() else 'cpu'
 
     def build_index(self, example_pool: List[Dict[str, str]]):
@@ -38,14 +37,12 @@ class SemanticRetriever:
 
         embeddings = self.model.encode(questions, convert_to_numpy=True, show_progress_bar=True)
 
-        # Quan trọng: Chuẩn hóa L2 cho cosine similarity
         faiss.normalize_L2(embeddings)
 
-        d = embeddings.shape[1]  # Dimensionality
+        d = embeddings.shape[1]
 
-        self.index = faiss.IndexFlatIP(d) # IndexFlatIP là cosine similarity
+        self.index = faiss.IndexFlatIP(d)
 
-        # Sửa: Chuyển index lên GPU
         if self.device == 'cuda':
             try:
                 res = faiss.StandardGpuResources()
@@ -53,7 +50,7 @@ class SemanticRetriever:
                 logger.info("Successfully moved FAISS index to GPU.")
             except Exception as e:
                 logger.warning(f"Failed to move FAISS index to GPU, using CPU. Error: {e}")
-                self.device = 'cpu' # Fallback về CPU
+                self.device = 'cpu' 
 
         self.index.add(embeddings)
         logger.info(f"FAISS index built successfully with {self.index.ntotal} vectors.")
@@ -78,5 +75,3 @@ class SemanticRetriever:
         retrieved_examples = [self.example_pool[i] for i in retrieved_indices if i != -1]
 
         return retrieved_examples
-
-print("File src/retriever/semantic.py đã được ghi.")
