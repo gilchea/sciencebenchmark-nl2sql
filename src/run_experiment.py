@@ -6,14 +6,11 @@ import time
 import os
 import logging
 
-# Import các module tự viết
-# Import hàm dọn dẹp
 from src.utils import set_seed, load_json, create_schema_dict, timer, clean_sql_markdown
 from src.prompt_builder import PromptBuilder
 from src.retriever.semantic import SemanticRetriever
 from src.evaluator.metrics import ExperimentEvaluator
 
-# Cấu hình logging
 logger = logging.getLogger(__name__)
 
 # --- Cấu hình Experiment ---
@@ -38,9 +35,7 @@ METRICS_FILE = os.path.join(RESULTS_DIR, "metrics.json")
 
 # Cấu hình thử nghiệm
 K_VALUES = [0, 1, 3, 5]
-DEV_SAMPLE_LIMIT = 100 # Giữ 20 mẫu để test
-# K_VALUES = [0, 3]
-# DEV_SAMPLE_LIMIT = 2 # Giữ 20 mẫu để test
+DEV_SAMPLE_LIMIT = 100 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 RETRIEVER_NAME = f"semantic_{RETRIEVER_MODEL.split('/')[-1]}"
 
@@ -103,17 +98,12 @@ def generate_sql(model, tokenizer, prompt: str) -> (str, int, int):
         generated_text = tokenizer.decode(outputs[0, input_tokens:], skip_special_tokens=True)
         output_tokens = outputs[0, input_tokens:].shape[0]
 
-        # === SỬA LỖI (FIX 22): Dọn dẹp ngay tại nguồn ===
-        # Dọn dẹp (xóa markdown, ';', và 'Question:...')
-        # trước khi trả về
         cleaned_sql = clean_sql_markdown(generated_text)
 
-        # Thêm lại dấu ; vào cuối CÂU LỆNH SẠCH
         if cleaned_sql:
             cleaned_sql += ';'
 
         return cleaned_sql, input_tokens, output_tokens
-        # === KẾT THÚC SỬA LỖI ===
 
     except Exception as e:
         logger.error(f"Error during model generation: {e}", exc_info=True)
@@ -136,8 +126,8 @@ def main():
     # 2. Load Data
     with timer("Load Data"):
         tables_data = load_json(TABLES_FILE)
-        icl_pool_data = load_json(ICL_POOL_FILE) # Dùng synth
-        eval_data = load_json(EVAL_FILE)         # Dùng dev
+        icl_pool_data = load_json(ICL_POOL_FILE) 
+        eval_data = load_json(EVAL_FILE)         
 
         if not tables_data or not icl_pool_data or not eval_data:
             logger.error("Failed to load one or more data files. Exiting.")
@@ -203,7 +193,7 @@ def main():
                 k_value=k,
                 retriever_name=RETRIEVER_NAME if k > 0 else "zero-shot",
                 eval_item=eval_item,
-                generated_sql=generated_sql, # Truyền SQL SẠCH
+                generated_sql=generated_sql, 
                 latency=latency,
                 input_tokens=input_tokens,
                 output_tokens=output_tokens
@@ -221,5 +211,3 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         logger.error(f"An unexpected error occurred: {e}", exc_info=True)
-
-print("File src/run_experiment.py ĐÃ ĐƯỢC SỬA (FIX 22 - Log Sạch).")
