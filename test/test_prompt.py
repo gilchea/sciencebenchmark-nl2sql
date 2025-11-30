@@ -10,19 +10,17 @@ from src.retriever.semantic import SemanticRetriever
 from src.prompt_builder import PromptBuilder
 from src.utils import load_json, create_schema_dict
 
-# Tắt bớt log của thư viện
 logging.getLogger("sentence_transformers").setLevel(logging.ERROR)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# --- Cấu hình (Copy từ run_experiment) ---
 PROJECT_DIR = "/content/drive/MyDrive/nlp/nl2sql_project"
 DATA_DIR = os.path.join(PROJECT_DIR, "data/cordis")
 TABLES_FILE = os.path.join(DATA_DIR, "tables.json")
-SYNTH_FILE = os.path.join(DATA_DIR, "synth.json") # ICL Pool
-DEV_FILE = os.path.join(DATA_DIR, "dev.json")     # Nguồn câu hỏi
+SYNTH_FILE = os.path.join(DATA_DIR, "synth.json") 
+DEV_FILE = os.path.join(DATA_DIR, "dev.json")     
 RETRIEVER_MODEL = "BAAI/bge-small-en-v1.5"
-DEVICE = "cpu" # Dùng CPU cho test nhanh
+DEVICE = "cpu" 
 
 K_TO_TEST = 3        # Số lượng retrieval
 NUM_PROMPTS = 3      # In 3 prompt
