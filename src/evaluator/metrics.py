@@ -13,7 +13,7 @@ def normalize_sql(sql: str) -> str:
     """
     A simple normalization function for SQL queries.
     """
-    # SỬA LỖI (FIX 21): Dùng hàm dọn dẹp trung tâm
+    
     sql = clean_sql_markdown(sql)
 
     sql = sql.lower()
@@ -24,7 +24,6 @@ def check_exact_match(generated_sql: str, ground_truth_sql: str) -> bool:
     """
     Performs a normalized Exact Match (EM) comparison.
     """
-    # Hàm này giờ sẽ so sánh 2 chuỗi đều không có dấu ;
     return normalize_sql(generated_sql) == normalize_sql(ground_truth_sql)
 
 class ExperimentEvaluator:
@@ -59,33 +58,11 @@ class ExperimentEvaluator:
         db_connection_str = 'postgresql+psycopg2://postgres:password@localhost:5432/cordis_temporary?options=-c search_path=unics_cordis,public -c statement_timeout=5000'
         engine = create_engine(db_connection_str)
 
-        # --- 4. THỰC THI ---
         print("🚀 Đang chạy đánh giá...")
-        # results = []
-        # matches = []
 
         with engine.connect() as conn:
             conn.execute(text("SET search_path TO unics_cordis, public;"))
-            # total_rows = len(df_logs)
-
-            # for index, row in df_logs.iterrows():
-            #     status, is_match = check_execution_match(row, conn, index)
-            #     results.append(status)
-            #     matches.append(is_match)
             status, is_match = check_execution_match(generated_sql, ground_truth_sql, conn)
-
-        #         if index % 50 == 0:
-        #             print(f"Đang xử lý dòng {index}/{total_rows}...")
-
-        # # --- 5. LƯU KẾT QUẢ ---
-        # df_logs['execution_status'] = results
-        # df_logs['execution_match'] = matches
-        # accuracy = df_logs['execution_match'].mean() * 100
-
-        # print("-" * 50)
-        # print(f"✅ HOÀN TẤT! Accuracy: {accuracy:.2f}%")
-        # df_logs.to_csv(output_csv_path, index=False)
-        # print(f"📁 Kết quả đã lưu tại Drive: {output_csv_path}")
 
         log_entry = {
             'k': k_value,
@@ -93,9 +70,9 @@ class ExperimentEvaluator:
             'db_id': eval_item.get('db_id', ''),
             'question': eval_item.get('question', ''),
             'ground_truth_sql': ground_truth_sql,
-            'generated_sql': generated_sql, # Vẫn lưu log "bẩn" (raw)
-            'exact_match': em,             # Nhưng kết quả thì "sạch"
-            'syntax_valid': syntax_valid,    # (sạch)
+            'generated_sql': generated_sql, 
+            'exact_match': em,            
+            'syntax_valid': syntax_valid,   
             'execution_status': status,
             'execution_match': is_match,
             'latency_sec': latency,
@@ -131,7 +108,6 @@ class ExperimentEvaluator:
             avg_total_tokens=('total_tokens', 'mean')
         ).reset_index()
 
-        # Chuyển đổi tỷ lệ sang % cho dễ đọc
         agg_metrics['exact_match_rate'] = (agg_metrics['exact_match_rate'] * 100).round(2)
         agg_metrics['syntax_valid_rate'] = (agg_metrics['syntax_valid_rate'] * 100).round(2)
         agg_metrics['execution_match_rate'] = (agg_metrics['execution_match_rate'] * 100).round(2)
