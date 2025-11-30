@@ -1,13 +1,14 @@
 import json
 import random
 import numpy as np
+import pandas as pd
 import torch
 import sqlite3
 import logging
 import time
 import re
 from contextlib import contextmanager
-import sqlparse # <<< THƯ VIỆN MỚI
+import sqlparse 
 
 import os
 import shutil
@@ -15,11 +16,7 @@ import subprocess
 from sqlalchemy import create_engine, text
 
 import sqlfluff
-import logging # Hoặc bất cứ logger nào bạn đang dùng
-
-import pandas as pd
-# from sqlalchemy import create_engine, text
-import numpy as np
+import logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -154,16 +151,12 @@ def clean_sql_markdown(sql: str) -> str:
 
     return sql
 
-# ----- BẮT BUỘC: Import lỗi chính xác -----
-# Chúng ta sẽ tìm và import lỗi APIParsingError một cách an toàn
 try:
     from sqlfluff.core.errors import APIParsingError
 except ImportError:
     try:
         from sqlfluff.api import APIParsingError
     except ImportError:
-        # Nếu phiên bản quá cũ/mới, ta bắt lỗi chung nhất
-        # Mặc dù điều này hiếm khi xảy ra
         print("Cảnh báo: Không tìm thấy APIParsingError, sẽ bắt Exception chung.")
         APIParsingError = Exception
 
@@ -172,39 +165,26 @@ def check_sql_syntax(sql_query: str) -> bool:
     Kiểm tra xem một câu SQL có cú pháp HỢP LỆ hay không bằng sqlfluff.
     Đây là phương pháp xác thực (validation) đáng tin cậy.
     """
-    # 1. Giữ lại logic dọn dẹp của bạn
     sql_query = clean_sql_markdown(sql_query)
 
     if not sql_query:
         return False
-
     try:
-        # 2. Yêu cầu sqlfluff phân tích câu lệnh
-        # 'dialect="ansi"' là chuẩn SQL chung, rất an toàn.
         sqlfluff.parse(sql_query, dialect="ansi")
-
-        # 3. Nếu dòng trên chạy thành công (không văng lỗi)
-        #    có nghĩa là cú pháp ĐÚNG.
         return True
 
     except APIParsingError:
-        # 4. Nếu sqlfluff văng lỗi này, có nghĩa là
-        #    cú pháp 100% SAI. Đây là điều chúng ta muốn.
         return False
 
     except Exception as e:
-        # 5. Bắt các lỗi không mong muốn khác (lỗi nội bộ, v.v.)
-        #    Bạn có thể log lỗi này nếu muốn
-        # logger.warning(f"Lỗi sqlfluff không mong muốn: {e} | SQL: {sql_query}")
         return False
 
 # --- 1. CẤU HÌNH ĐƯỜNG DẪN ---
-drive_folder_path = '/content/drive/MyDrive/nlp/nl2sql_project/data/cordis.sql' # Nguồn
-local_dest_dir = '/content/cordis_full_data' # Đích (trên Colab)
+drive_folder_path = '/content/drive/MyDrive/nlp/nl2sql_project/data/cordis.sql' 
+local_dest_dir = '/content/cordis_full_data' 
 
 print("🚀 Bắt đầu quy trình: Copy -> Fix Path -> Restore...")
 
-# --- 2. COPY DỮ LIỆU TỪ DRIVE (Workaround Permission) ---
 if os.path.exists(local_dest_dir):
     print(f"🗑️ Xóa thư mục cũ {local_dest_dir} để copy mới...")
     shutil.rmtree(local_dest_dir)
@@ -220,7 +200,6 @@ except Exception as e:
 # Cấp quyền đọc/ghi cho mọi user (để user 'postgres' đọc được)
 os.system(f"chmod -R 777 {local_dest_dir}")
 
-# --- 3. [FIX] THAY THẾ $$PATH$$ TRONG FILE SQL ---
 sql_file_path = os.path.join(local_dest_dir, "restore.sql")
 fixed_sql_path = os.path.join(local_dest_dir, "restore_fixed_new_new.sql")
 
@@ -263,40 +242,14 @@ if restore_result.returncode != 0:
 else:
     print("✅ Lệnh Restore chạy xong (Kiểm tra dữ liệu bên dưới).")
 
-# # --- 5. KIỂM TRA DỮ LIỆU THỰC TẾ ---
-# print("\n🔍 Đang kiểm tra số lượng bản ghi trong Database...")
-# # Kết nối DB để check
-# db_connection_str = 'postgresql+psycopg2://postgres:password@localhost:5432/cordis_temporary?options=-c search_path=unics_cordis,public'
-# engine = create_engine(db_connection_str)
-
-# try:
-#     with engine.connect() as conn:
-#         # Kiểm tra bảng 'projects' (bảng trung tâm của Cordis)
-#         # Nếu bảng này không tồn tại nghĩa là lệnh tạo bảng thất bại
-#         result = conn.execute(text("SELECT count(*) FROM projects;"))
-#         count = result.scalar()
-#         print(f"📊 Số lượng dòng trong bảng 'projects': {count}")
-
-#         if count > 0:
-#             print("-" * 50)
-#             print("🎉 THÀNH CÔNG RỰC RỠ! DATABASE ĐÃ CÓ DỮ LIỆU.")
-#             print("-" * 50)
-#         else:
-#             print("⚠️ CẢNH BÁO: Bảng có tồn tại nhưng số dòng = 0. Kiểm tra lại nội dung file .dat!")
-# except Exception as e:
-#     print(f"❌ Lỗi khi query kiểm tra: {e}")
-#     print("Gợi ý: Có thể file SQL chưa tạo được bảng. Xem lại log lỗi ở bước 4.")
-
 def check_execution_match(sql_gen: str, sql_truth: str, conn):
 
     if pd.isna(sql_gen) or str(sql_gen).strip() == "":
         return "Empty Generated SQL", False
 
     try:
-        # Luôn set path để đảm bảo đúng schema
         conn.execute(text("SET search_path TO unics_cordis, public;"))
 
-        # Bọc text() để fix lỗi thư viện
         t_sql_truth = text(sql_truth)
         t_sql_gen = text(sql_gen)
 
@@ -318,9 +271,8 @@ def check_execution_match(sql_gen: str, sql_truth: str, conn):
             return "Value Mismatch", False
 
     except Exception as e:
-        conn.rollback() # Bắt buộc rollback
+        conn.rollback() 
         err_msg = str(e)
         if "canceling statement due to statement timeout" in err_msg:
-            # print(f"⚠️ Dòng {index}: Timeout (>5s)")
             return "Timeout (>5s)", False
         return f"SQL Error: {err_msg.splitlines()[0]}", False
