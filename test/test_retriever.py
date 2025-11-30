@@ -2,7 +2,6 @@ import unittest
 import os
 import sys
 
-# Thêm src vào path để import
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.retriever.semantic import SemanticRetriever
@@ -19,7 +18,6 @@ class TestSemanticRetriever(unittest.TestCase):
             {"question": "what are the project titles", "query": "SELECT title FROM project", "sql": {}},
         ]
 
-        # Dùng CPU để test cho nhanh và độc lập
         cls.retriever = SemanticRetriever(device='cpu')
         cls.retriever.build_index(cls.example_pool)
 
@@ -31,18 +29,18 @@ class TestSemanticRetriever(unittest.TestCase):
 
     def test_retrieve_k1(self):
         """Test retrieving 1 example."""
-        query = "what is the total budget" # Gần với "budget over 1 million"
+        query = "what is the total budget" 
         results = self.retriever.retrieve(query, k=1)
 
         self.assertIsInstance(results, list)
         self.assertEqual(len(results), 1)
         self.assertIn('question', results[0])
-        self.assertIn('query', results[0]) # Kiểm tra key mới
+        self.assertIn('query', results[0]) 
         self.assertEqual(results[0]['question'], "list projects with budget over 1 million")
 
     def test_retrieve_k2(self):
         """Test retrieving 2 examples."""
-        query = "count all projects" # Gần với "how many projects" và "project titles"
+        query = "count all projects" 
         results = self.retriever.retrieve(query, k=2)
 
         self.assertEqual(len(results), 2)
