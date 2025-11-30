@@ -1,12 +1,10 @@
 from typing import List, Dict
 
-# === SỬA LỖI (FIX 22): Yêu cầu PostgreSQL ===
 BASE_INSTRUCTION = """You are an NL-to-SQL assistant. Given a natural language question and the database schema, generate a single SQL query that answers the question. Conditions:
 - Use SQL compatible with PostgreSQL 9.5.
 - Do not add comments.
 - Keep it concise: one SQL statement ending with a semicolon.
 - Use the schema provided."""
-# === KẾT THÚC SỬA LỖI ===
 
 EXAMPLE_FMT = """### Example
 Question: {question}
@@ -70,5 +68,3 @@ class PromptBuilder:
         ).strip()
 
         return final_prompt
-
-print("File src/prompt_builder.py ĐÃ ĐƯỢC SỬA (FIX 22 - Yêu cầu PostgreSQL).")
