@@ -1,0 +1,24 @@
+# Deep Learning & Models
+torch
+transformers
+accelerate
+bitsandbytes
+peft
+sentence-transformers
+
+# Data Processing & Math
+pandas
+numpy
+tqdm
+
+# Vector Database
+faiss-cpu
+
+# Database & SQL Tools
+sqlalchemy
+psycopg2-binary
+sqlfluff
+sqlparse
+
+# Jupyter/Environment (Optional but recommended)
+ipykernel
