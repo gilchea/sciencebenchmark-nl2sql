@@ -27,6 +27,12 @@ this work on Github repository.
 
 (Link paper will be deployed)
 
+## Database
+
+The PostgreSQL databases for database used for this benchmark can be found at the following links: [CORDIS](https://drive.usercontent.google.com/download?id=1-YXF9mPN7GmK4ApBz2aZjAoJkdpPE6JF&export=download&authuser=0)
+
+After downloading, extract (if needed) and place all files into data
+
 ## Citation
 
 If you would like to cite this paper, please use the following reference:
